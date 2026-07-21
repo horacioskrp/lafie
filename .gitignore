@@ -1,0 +1,30 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+[Bb]in/
+[Oo]bj/
+
+# Rider / IDE
+.idea/
+.vs/
+*.DotSettings.user
+
+# Build / test artefacts
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+TestResults/
+*.trx
+coverage*.xml
+*.coverage
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# OS
+.DS_Store
+Thumbs.db

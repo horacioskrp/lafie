@@ -1,0 +1,48 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Api/">
+    <Project Path="src/Api/Lafie.Api/Lafie.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Lafie.Infrastructure/Lafie.Infrastructure.csproj" />
+    <Project Path="src/BuildingBlocks/Lafie.Shared/Lafie.Shared.csproj" />
+    <Project Path="src/BuildingBlocks/Lafie.SharedKernel/Lafie.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Lafie.Identity.Api/Lafie.Identity.Api.csproj" />
+    <Project Path="src/Modules/Identity/Lafie.Identity.Application/Lafie.Identity.Application.csproj" />
+    <Project Path="src/Modules/Identity/Lafie.Identity.Domain/Lafie.Identity.Domain.csproj" />
+    <Project Path="src/Modules/Identity/Lafie.Identity.Infrastructure/Lafie.Identity.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Interop/">
+    <Project Path="src/Modules/Interop/Lafie.Interop.Api/Lafie.Interop.Api.csproj" />
+    <Project Path="src/Modules/Interop/Lafie.Interop.Application/Lafie.Interop.Application.csproj" />
+    <Project Path="src/Modules/Interop/Lafie.Interop.Domain/Lafie.Interop.Domain.csproj" />
+    <Project Path="src/Modules/Interop/Lafie.Interop.Infrastructure/Lafie.Interop.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Organization/">
+    <Project Path="src/Modules/Organization/Lafie.Organization.Api/Lafie.Organization.Api.csproj" />
+    <Project Path="src/Modules/Organization/Lafie.Organization.Application/Lafie.Organization.Application.csproj" />
+    <Project Path="src/Modules/Organization/Lafie.Organization.Domain/Lafie.Organization.Domain.csproj" />
+    <Project Path="src/Modules/Organization/Lafie.Organization.Infrastructure/Lafie.Organization.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Patient/">
+    <Project Path="src/Modules/Patient/Lafie.Patient.Api/Lafie.Patient.Api.csproj" />
+    <Project Path="src/Modules/Patient/Lafie.Patient.Application/Lafie.Patient.Application.csproj" />
+    <Project Path="src/Modules/Patient/Lafie.Patient.Domain/Lafie.Patient.Domain.csproj" />
+    <Project Path="src/Modules/Patient/Lafie.Patient.Infrastructure/Lafie.Patient.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Terminology/">
+    <Project Path="src/Modules/Terminology/Lafie.Terminology.Api/Lafie.Terminology.Api.csproj" />
+    <Project Path="src/Modules/Terminology/Lafie.Terminology.Application/Lafie.Terminology.Application.csproj" />
+    <Project Path="src/Modules/Terminology/Lafie.Terminology.Domain/Lafie.Terminology.Domain.csproj" />
+    <Project Path="src/Modules/Terminology/Lafie.Terminology.Infrastructure/Lafie.Terminology.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Web/">
+    <Project Path="src/Web/Lafie.Web/Lafie.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Lafie.ArchitectureTests/Lafie.ArchitectureTests.csproj" />
+  </Folder>
+</Solution>
