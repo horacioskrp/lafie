@@ -35,14 +35,14 @@ Lafie.slnx                          solution .NET : backend (Api, BuildingBlocks
 │       └── Interop       (ajouté)  FHIR Gateway (IPS/Bundle), connecteur DHIS2, échange documents,
 │                                   ADAPTERS de conformité par pays (Togo/UE/US/FR)
 ├── clients                         ← FRONTEND (hors solution .NET, toolchain Node)
-│   └── web                         React + TypeScript + Vite (SPA) + Dockerfile (nginx)
+│   └── lafie-navigator                        React + TypeScript + Vite (SPA) + Dockerfile (nginx)
 └── tests
     ├── Lafie.ArchitectureTests     frontières de modules (NetArchTest/ArchUnitNET)
     ├── <Module>.UnitTests          domaine + handlers
     └── Lafie.IntegrationTests      Postgres (Testcontainers)
 ```
 
-> **Séparation clients / backend.** Le frontend est une **SPA React + TypeScript (Vite)** sous `clients/web`, avec sa **propre toolchain Node** et son **propre `Dockerfile`** (build Node → **nginx**). Il **ne fait pas partie de la solution .NET** (`Lafie.slnx` = backend + tests). Client **fin** : il consomme l'API par HTTP via **`/api`** (proxy nginx en conteneur, proxy Vite en dev → pas de CORS). L'image Docker de l'API n'inclut pas les clients (`clients/` exclu via `.dockerignore`). **Mobile** : ultérieur (React Native ou PWA), hors périmètre actuel.
+> **Séparation clients / backend.** Le frontend est une **SPA React + TypeScript (Vite)** sous `clients/lafie-navigator`, avec sa **propre toolchain Node** et son **propre `Dockerfile`** (build Node → **nginx**). Il **ne fait pas partie de la solution .NET** (`Lafie.slnx` = backend + tests). Client **fin** : il consomme l'API par HTTP via **`/api`** (proxy nginx en conteneur, proxy Vite en dev → pas de CORS). L'image Docker de l'API n'inclut pas les clients (`clients/` exclu via `.dockerignore`). **Mobile** : ultérieur (React Native ou PWA), hors périmètre actuel.
 
 Chaque module sous `Modules/` = **4 projets** : `Lafie.<Module>.Domain`, `.Application`, `.Infrastructure`, `.Api`.
 
@@ -99,7 +99,7 @@ Frontières vérifiées en CI par **tests d'architecture**.
 
 ## 9. Clients (validé : clients fins, domaine serveur)
 
-- **Frontend = SPA React + TypeScript (Vite)** sous `clients/web`, séparé du backend (toolchain Node, Dockerfile nginx propre). Voir §2.
+- **Frontend = SPA React + TypeScript (Vite)** sous `clients/lafie-navigator`, séparé du backend (toolchain Node, Dockerfile nginx propre). Voir §2.
 - Client **fin** : toute la logique domaine reste **côté serveur** (`Lafie.Api`) ; le front consomme l'API par HTTP via `/api` (proxy nginx/Vite).
 - **Mobile** : ultérieur — **React Native** (partage de code TS avec le web) ou **PWA**. Non retenu au départ.
 
@@ -167,5 +167,5 @@ Squelette **Phase 0 créé** : `Lafie.slnx` (format solution XML .NET 10) + **25
 ### Gotchas environnement (machine de dev)
 
 - **Format solution** : `.NET 10` génère `Lafie.slnx` (XML), pas `.sln`. Commandes : `dotnet build Lafie.slnx`.
-- **Frontend React** (`clients/web`) : SPA React+TS+Vite, `docker compose up` la sert sur **http://localhost:3000** (nginx), proxy `/api` → backend. Mobile natif = ultérieur (React Native/PWA).
+- **Frontend React** (`clients/lafie-navigator`) : SPA React+TS+Vite, `docker compose up` la sert sur **http://localhost:3000** (nginx), proxy `/api` → backend. Mobile natif = ultérieur (React Native/PWA).
 - ⚠️ **Smart App Control (Enforce)** bloque l'exécution/chargement des DLL locales non signées (`0x800711C7`, non déterministe). Le **build réussit** ; **exécuter `Lafie.Api` et certains runs de tests échouent** tant que SAC n'est pas contourné. Options : WSL2/Docker Linux (recommandé, SAC ne s'y applique pas), désactiver SAC (irréversible), ou signer les assemblies. Décision reportée.

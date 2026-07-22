@@ -69,9 +69,9 @@ Décisions structurantes de Lafie. Format léger. Statut au 2026-07-21 : **valid
 
 ## ADR-012 — Frontend React/TS/Vite (remplace les clients C#) ✅ validé
 
-**Décision.** Le frontend est une **SPA React + TypeScript (Vite)** sous `clients/web`. Les projets clients C# (Blazor `Lafie.Web`, RCL `Lafie.Ui`, MAUI `Lafie.Mobile`) sont **supprimés**. Le filtre `Lafie.Backend.slnf` est retiré (redondant : `Lafie.slnx` = backend + tests).
+**Décision.** Le frontend est une **SPA React + TypeScript (Vite)** sous `clients/lafie-navigator`. Les projets clients C# (Blazor `Lafie.Web`, RCL `Lafie.Ui`, MAUI `Lafie.Mobile`) sont **supprimés**. Le filtre `Lafie.Backend.slnf` est retiré (redondant : `Lafie.slnx` = backend + tests).
 **Pourquoi.** Choix de l'utilisateur (2026-07-22). Écosystème front JS/TS plus large ; découplage total front/back ; toolchain Node indépendante de la solution .NET.
-**Conséquence.** `clients/web` = React/TS/Vite avec son propre `Dockerfile` (build Node → **nginx**). Le front consomme l'API via **`/api`** (proxy nginx en conteneur, proxy Vite en dev → pas de CORS). `docker-compose` ajoute un service `web` (`3000:80`). L'image API reste découplée (`clients/` dans `.dockerignore`). **Mobile** : ultérieur (React Native / PWA). Remplace ADR-006 (clients MAUI/Blazor).
+**Conséquence.** `clients/lafie-navigator` = React/TS/Vite avec son propre `Dockerfile` (build Node → **nginx**). Le front consomme l'API via **`/api`** (proxy nginx en conteneur, proxy Vite en dev → pas de CORS). `docker-compose` ajoute un service `web` (`3000:80`). L'image API reste découplée (`clients/` dans `.dockerignore`). **Mobile** : ultérieur (React Native / PWA). Remplace ADR-006 (clients MAUI/Blazor).
 
 ## ADR-011 — Stack étendue (Mediator source-gen, Finbuckle, JWT+Identity, obs.) ✅ validé
 

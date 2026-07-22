@@ -32,7 +32,7 @@ services:
       - "8081:8080"
 
   web:
-    build: ./clients/web
+    build: ./clients/lafie-navigator
     container_name: lafie-web
     depends_on:
       - api
