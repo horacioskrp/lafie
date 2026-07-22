@@ -35,7 +35,19 @@ Décisions structurantes de Lafie. Format léger. Statut au 2026-07-21 : **valid
 
 **Décision.** Un schéma PostgreSQL par module (pas de FK cross-schema) ; une base **par région** (souveraineté/résidence).
 **Pourquoi.** Isolation logique des modules + exigences de résidence des données (Togo local / HDS FR / HIPAA US).
-**Conséquence.** Un `DbContext` EF Core par module ; tenant → région → connexion + pack. Pas de base unique multi-pays. Forme domaine = source de vérité ; FHIR en JSONB pour audit/échange.
+**Conséquence.** Accès **Dapper** par module (voir ADR-009) ; tenant → région → connexion + pack. Pas de base unique multi-pays. Forme domaine = source de vérité ; FHIR en JSONB pour audit/échange.
+
+## ADR-009 — Dapper (pas d'EF Core) ✅ validé
+
+**Décision.** Persistance via **Dapper + Npgsql** (SQL explicite), **pas** d'Entity Framework Core.
+**Pourquoi.** Choix explicite de l'utilisateur (2026-07-22) : contrôle du SQL, pas d'abstraction ORM lourde.
+**Conséquence.** `IDbConnectionFactory` (Npgsql) dans `Lafie.Infrastructure` ; requêtes Dapper dans les `*.Infrastructure` des modules. **Pas de migrations EF** — schémas/tables en **SQL brut** (scripts `db/init` montés dans Postgres). Repositories = SQL explicite.
+
+## ADR-010 — Environnement de run : Docker Compose (Postgres + api)
+
+**Décision.** Développer/exécuter via **Docker Compose** : Postgres + API en conteneurs.
+**Pourquoi.** Contourne **Smart App Control** (build/run Linux, DLL non bloquées), fournit la base, aligné déploiement serveur.
+**Conséquence.** `docker-compose.yml` (Postgres `5433:5432`, api `8081:8080`) + `Dockerfile` multi-stage. Port hôte 5432 pris par Laragon → 5433 ; 8080 pris → 8081. Endpoints de preuve : `/health`, `/health/db` (Dapper `select 1`).
 
 ## ADR-006 — Clients fins, domaine côté serveur ✅ validé
 
@@ -57,7 +69,7 @@ Décisions structurantes de Lafie. Format léger. Statut au 2026-07-21 : **valid
 
 ## Stack retenue
 
-.NET 10 · ASP.NET Core · Firely `Hl7.Fhir.R4` · EF Core + Npgsql · MediatR · FluentValidation · Outbox/bus in-process · MAUI Blazor Hybrid + Blazor Web + RCL · NetArchTest/ArchUnitNET · Testcontainers · OpenTelemetry.
+.NET 10 · ASP.NET Core · Firely `Hl7.Fhir.R4` · **Dapper + Npgsql** · FluentValidation · Outbox/bus in-process · Docker Compose (Postgres) · MAUI Blazor Hybrid + Blazor Web + RCL · NetArchTest/ArchUnitNET · OpenTelemetry.
 
 Solution au format **`Lafie.slnx`** (XML, défaut .NET 10). Squelette Phase 0 livré (26 projets, build 0/0). ⚠️ Gotcha : **Smart App Control (Enforce)** bloque le chargement des DLL locales non signées (`0x800711C7`) → exécution du host reportée (WSL/Docker ou désactivation SAC). Détails : [README.md](README.md) §13.
 

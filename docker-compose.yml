@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: lafie-postgres
+    environment:
+      POSTGRES_USER: lafie
+      POSTGRES_PASSWORD: lafie
+      POSTGRES_DB: lafie
+    ports:
+      # 5432 est occupé par Laragon sur l'hôte -> on expose sur 5433.
+      - "5433:5432"
+    volumes:
+      - lafie_pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lafie -d lafie"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    container_name: lafie-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=lafie;Username=lafie;Password=lafie"
+    ports:
+      # 8080 souvent pris sur l'hôte -> exposition sur 8081.
+      - "8081:8080"
+
+volumes:
+  lafie_pgdata:

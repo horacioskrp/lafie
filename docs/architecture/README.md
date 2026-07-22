@@ -25,7 +25,7 @@ Lafie.sln
 │   │   ├── Lafie.SharedKernel      types domaine de base (AggregateRoot, ValueObject, DomainEvent, Result)
 │   │   ├── Lafie.Shared            contrats inter-modules : integration events, API publiques,
 │   │   │                           abstractions CQRS (ICommand/IQuery, IEventBus) + PORTS de conformité
-│   │   └── Lafie.Infrastructure    technique partagé : EF Core base, Outbox + bus in-process, Postgres,
+│   │   └── Lafie.Infrastructure    technique partagé : Dapper/Npgsql (connection factory), Outbox + bus in-process,
 │   │                               wrappers FHIR (Firely Hl7.Fhir.R4), auth OIDC/SMART, audit ATNA, télémétrie
 │   └── Modules
 │       ├── Identity                utilisateurs, professionnels, rôles, authent./autoris.
@@ -54,7 +54,7 @@ Chaque module sous `Modules/` = **4 projets** : `Lafie.<Module>.Domain`, `.Appli
 | --- | --- | --- |
 | `Lafie.SharedKernel` | `Entity`, `AggregateRoot`, `ValueObject`, `DomainEvent`, `Result`, identifiants forts | aucune |
 | `Lafie.Shared` | integration events, interfaces publiques de module, abstractions CQRS, **ports de conformité** | SharedKernel |
-| `Lafie.Infrastructure` | EF Core base, Outbox + bus in-process, Npgsql, wrappers FHIR (Firely), auth OIDC/SMART, audit ATNA, OpenTelemetry | Shared |
+| `Lafie.Infrastructure` | Dapper/Npgsql (`IDbConnectionFactory`), Outbox + bus in-process, wrappers FHIR (Firely), auth OIDC/SMART, audit ATNA, OpenTelemetry | Shared |
 
 ## 4. Couches par module (hexagonal)
 
@@ -63,7 +63,7 @@ Domain          agrégats, value objects, invariants, domain events   (dép. Sha
    ▲
 Application     commands/queries + handlers, ports du module          (dép. Domain, Shared)
    ▲
-Infrastructure  EF Core/Postgres, impl. ports, clients externes       (dép. Application, BuildingBlocks/Infrastructure)
+Infrastructure  Dapper/Postgres, impl. ports, clients externes        (dép. Application, BuildingBlocks/Infrastructure)
    ▲
 Api (module)    endpoints, enregistrement DI, intégration host
 ```
@@ -81,12 +81,12 @@ Frontières vérifiées en CI par **tests d'architecture**.
 
 ## 6. CQRS + fiabilité (validé : pragmatique)
 
-- **Commands/Queries** via MediatR. Write model = agrégats + EF Core. Read model = **projections** dans la même base (schémas/vues dédiés). **Pas d'event sourcing** au départ ; activable par module plus tard.
+- **Commands/Queries** (handlers). Write model = agrégats persistés via **Dapper** (SQL explicite). Read model = **projections / requêtes SQL** dédiées. **Pas d'event sourcing** au départ ; activable par module plus tard.
 - **Domain events** → handlers application → **integration events** publiés via **Outbox** (livraison garantie, idempotence).
 
 ## 7. Persistance PostgreSQL (validé : schema-per-module + DB-per-région)
 
-- **Un schéma PostgreSQL par module** (`identity`, `patient`, `clinical`, …), pas de FK cross-schema. Un `DbContext` EF Core par module.
+- **Un schéma PostgreSQL par module** (`identity`, `patient`, `organization`, …), pas de FK cross-schema. Accès **Dapper** ; schémas/tables gérés en **SQL brut** (scripts, pas de migrations EF).
 - **Une base par région** (Togo / UE / US) → **souveraineté & résidence des données**. Pas de base unique multi-pays.
 - **Source de vérité = forme domaine** (relationnel). FHIR JSON conservé en **JSONB** dans `Interop` (audit/échange).
 - **Tenant → région → pack actif + connexion DB** résolus au bootstrap.
@@ -115,7 +115,7 @@ AuthN/Z (OIDC + scopes SMART on FHIR) · Audit ATNA (`BuildingBlocks/Infrastruct
 | Runtime | .NET 10 (C#) — SDK installé 10.0.x |
 | API | ASP.NET Core (+ SMART on FHIR) |
 | FHIR | Firely SDK `Hl7.Fhir.R4` |
-| ORM | EF Core + Npgsql |
+| Accès données | **Dapper + Npgsql** (SQL explicite, pas d'EF Core) |
 | CQRS/mediator | MediatR |
 | Validation | FluentValidation |
 | Events | Outbox + bus in-process (abstraction broker-ready) |
@@ -142,7 +142,14 @@ Squelette **Phase 0 créé** : `Lafie.slnx` (format solution XML .NET 10) + **26
 
 - **Build** : `dotnet build Lafie.slnx` → **0 erreur, 0 warning**.
 - **Tests d'architecture** : 3 règles (isolation Domain, indépendance des modules, isolation SharedKernel) — vertes quand l'environnement autorise le chargement des DLL.
-- Projets vides (markers d'assembly + `Add*Module` stubs), building blocks stubs (`Entity`, `AggregateRoot`, `ValueObject`, `Result`, CQRS, `IEventBus`, ports de conformité, Outbox, bus in-process). Aucune logique métier, aucune migration.
+- Projets vides (markers d'assembly + `Add*Module` stubs), building blocks stubs (`Entity`, `AggregateRoot`, `ValueObject`, `Result`, CQRS, `IEventBus`, ports de conformité, Outbox, bus in-process). Aucune logique métier.
+
+### Incrément data (2026-07-22)
+
+- **Docker Compose** : Postgres (`5433:5432`) + API (`8081:8080`), `Dockerfile` multi-stage. Run Linux → **contourne SAC**.
+- **Dapper/Npgsql** : `IDbConnectionFactory` + `DatabaseHealth` dans `Lafie.Infrastructure` ; `AddLafiePersistence(connectionString)`.
+- **Schémas par module** créés au démarrage via `db/init/01-schemas.sql` (`organization, identity, patient, terminology, interop`).
+- **Vérifié** : `docker compose up --build` → `/health` = 200, `/health/db` = `{"database":"up"}` (Dapper `select 1`). Commandes : `docker compose up -d` / `down`.
 
 ### Gotchas environnement (machine de dev)
 
