@@ -4,8 +4,18 @@ using Lafie.Interop.Api;
 using Lafie.Organization.Api;
 using Lafie.Patient.Api;
 using Lafie.Terminology.Api;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Erreurs HTTP normalisées (RFC 9457 ProblemDetails).
+builder.Services.AddProblemDetails();
+
+// Documentation d'API (OpenAPI) + UI de référence Scalar.
+builder.Services.AddOpenApi();
+
+// CQRS via Mediator (source-generated) — découvre les handlers des modules référencés.
+builder.Services.AddMediator();
 
 // Persistance Dapper/Npgsql partagée.
 var connectionString = builder.Configuration.GetConnectionString("Postgres")
@@ -13,7 +23,6 @@ var connectionString = builder.Configuration.GetConnectionString("Postgres")
 builder.Services.AddLafiePersistence(connectionString);
 
 // Enregistrement des modules — Phase 0 (socle).
-// Chaque Add*Module est un point d'entrée DI vide pour l'instant.
 builder.Services
     .AddIdentityModule()
     .AddOrganizationModule()
@@ -22,6 +31,12 @@ builder.Services
     .AddInteropModule();
 
 var app = builder.Build();
+
+// Renvoie un ProblemDetails sur exception non gérée.
+app.UseExceptionHandler();
+
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", phase = "0-skeleton" }));
 

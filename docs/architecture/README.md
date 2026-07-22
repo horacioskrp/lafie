@@ -110,14 +110,20 @@ AuthN/Z (OIDC + scopes SMART on FHIR) · Audit ATNA (`BuildingBlocks/Infrastruct
 
 ## 11. Stack
 
+> Stack cible complète (Mediator, Finbuckle, JWT+Identity, HybridCache/Valkey, Hangfire, MinIO, Serilog+OTel, Scalar…) et adoption par phases : **[stack.md](stack.md)**. Tableau condensé ci-dessous.
+
 | Besoin | Choix |
 | --- | --- |
 | Runtime | .NET 10 (C#) — SDK installé 10.0.x |
 | API | ASP.NET Core (+ SMART on FHIR) |
 | FHIR | Firely SDK `Hl7.Fhir.R4` |
 | Accès données | **Dapper + Npgsql** (SQL explicite, pas d'EF Core) |
-| CQRS/mediator | MediatR |
+| CQRS/mediator | **Mediator** (martinothamar, source-generated) |
 | Validation | FluentValidation |
+| Multitenancy | Finbuckle (phase ultérieure) |
+| Auth | JWT + ASP.NET Identity (phase Identity) |
+| Doc API | OpenAPI + Scalar |
+| Observabilité | Serilog + OpenTelemetry |
 | Events | Outbox + bus in-process (abstraction broker-ready) |
 | UI | MAUI Blazor Hybrid + Blazor Web + RCL partagée |
 | Tests archi | NetArchTest / ArchUnitNET |
@@ -150,6 +156,14 @@ Squelette **Phase 0 créé** : `Lafie.slnx` (format solution XML .NET 10) + **26
 - **Dapper/Npgsql** : `IDbConnectionFactory` + `DatabaseHealth` dans `Lafie.Infrastructure` ; `AddLafiePersistence(connectionString)`.
 - **Schémas par module** créés au démarrage via `db/init/01-schemas.sql` (`organization, identity, patient, terminology, interop`).
 - **Vérifié** : `docker compose up --build` → `/health` = 200, `/health/db` = `{"database":"up"}` (Dapper `select 1`). Commandes : `docker compose up -d` / `down`.
+
+### Baseline légère (2026-07-22)
+
+- **Mediator** (martinothamar, source-generated) — `AddMediator()` (remplace les interfaces CQRS maison, `Cqrs.cs` supprimé).
+- **ProblemDetails** RFC 9457 — `AddProblemDetails()` + `UseExceptionHandler()`.
+- **OpenAPI + Scalar** — `AddOpenApi()` / `MapOpenApi()` + `MapScalarApiReference()`.
+- **Vérifié** (conteneur) : `/openapi/v1.json` = 200, `/scalar` = 200 (UI de référence).
+- Reste baseline : **Serilog + OpenTelemetry** + health probes. Puis module **Organization**.
 
 ### Gotchas environnement (machine de dev)
 

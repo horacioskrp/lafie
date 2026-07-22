@@ -4,6 +4,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- NU1903 : advisory DoS de parsing sur Microsoft.OpenApi (transitif via AspNetCore.OpenApi).
+         Outil de génération de doc, non embarqué au runtime patient. À lever quand un patch amont existe. -->
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +16,16 @@
     <ProjectReference Include="..\..\Modules\Terminology\Lafie.Terminology.Api\Lafie.Terminology.Api.csproj" />
     <ProjectReference Include="..\..\Modules\Interop\Lafie.Interop.Api\Lafie.Interop.Api.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Lafie.Infrastructure\Lafie.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mediator.Abstractions" Version="3.0.2" />
+    <PackageReference Include="Mediator.SourceGenerator" Version="3.0.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.16.16" />
   </ItemGroup>
 
 </Project>

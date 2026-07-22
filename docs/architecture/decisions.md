@@ -67,6 +67,12 @@ Décisions structurantes de Lafie. Format léger. Statut au 2026-07-21 : **valid
 **Pourquoi.** Figer les frontières avant d'écrire du domaine.
 **Conséquence.** Voir la section 11 de [README.md](README.md). Création **en attente d'un go explicite**.
 
+## ADR-011 — Stack étendue (Mediator source-gen, Finbuckle, JWT+Identity, obs.) ✅ validé
+
+**Décision.** Adopter la stack cible détaillée dans [stack.md](stack.md) : **Mediator** (martinothamar, source-generated) pour le CQRS, **Finbuckle** pour la multitenancy, **JWT + ASP.NET Identity** pour l'auth, **HybridCache/Valkey · Hangfire · S3/MinIO**, **Serilog + OpenTelemetry**, **OpenAPI + Scalar**, **ProblemDetails RFC 9457**.
+**Pourquoi.** Spec fournie par l'utilisateur (2026-07-22). **Persistance maintenue en Dapper** (la ligne EF Core de la spec est écartée — cf. ADR-009) ; patterns EF réinterprétés pour Dapper (soft-delete/audit/domain events/tenant — voir stack.md).
+**Conséquence.** Mediator remplace les interfaces CQRS maison de `Lafie.Shared`. Adoption **par phases** (baseline → auth → multitenancy → cross-cutting). ⚠️ ASP.NET Identity suppose EF : en Dapper, prévoir stores custom ou JWT-only (à trancher au module Identity).
+
 ## Stack retenue
 
 .NET 10 · ASP.NET Core · Firely `Hl7.Fhir.R4` · **Dapper + Npgsql** · FluentValidation · Outbox/bus in-process · Docker Compose (Postgres) · MAUI Blazor Hybrid + Blazor Web + RCL · NetArchTest/ArchUnitNET · OpenTelemetry.
