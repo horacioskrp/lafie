@@ -14,7 +14,8 @@ Stack de référence de Lafie. **Persistance = Dapper** (décision utilisateur, 
 | Erreurs HTTP | **RFC 9457 `ProblemDetails`** |
 | Doc API | **OpenAPI + [Scalar](https://scalar.com/)** (UI de référence) |
 | Observabilité | **Serilog** (logs structurés) + **OpenTelemetry** (traces/metrics/logs) + health probes |
-| Conteneurs | **Docker Compose** (Postgres, puis Valkey/MinIO) |
+| Frontend | **React + TypeScript + Vite** (SPA sous `clients/web`, hors solution .NET) ; **nginx** en conteneur, proxy `/api` → backend. Mobile ultérieur (React Native / PWA) |
+| Conteneurs | **Docker Compose** (Postgres + web ; puis Valkey/MinIO) |
 
 ## Auth & identité
 

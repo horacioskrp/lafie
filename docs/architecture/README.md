@@ -13,9 +13,8 @@ Un seul déployable. Frontières de modules strictes → extraction en services 
 ## 2. Structure de la solution
 
 ```
-Lafie.slnx                          backend + Web + Ui + tests (SANS MAUI)
-Lafie.Backend.slnf                  filtre : backend + tests seuls (CI serveur)
-├── src                             ← BACKEND
+Lafie.slnx                          solution .NET : backend (Api, BuildingBlocks, Modules) + tests
+├── src                             ← BACKEND (.NET)
 │   ├── Api
 │   │   └── Lafie.Api               ASP.NET Core host, FHIR REST facade, SMART on FHIR, composition des modules
 │   ├── BuildingBlocks
@@ -35,17 +34,15 @@ Lafie.Backend.slnf                  filtre : backend + tests seuls (CI serveur)
 │       ├── Terminology   (ajouté)  service multi-code (LOINC/SNOMED/ICD/ATC), validation de binding
 │       └── Interop       (ajouté)  FHIR Gateway (IPS/Bundle), connecteur DHIS2, échange documents,
 │                                   ADAPTERS de conformité par pays (Togo/UE/US/FR)
-├── clients                         ← FRONTENDS (séparés du backend)
-│   ├── Lafie.Web                   Blazor Web App
-│   ├── Lafie.Ui                    Razor Class Library partagée (Web + Mobile)
-│   └── Lafie.Mobile                MAUI Blazor Hybrid — placeholder, ISOLÉ (solution Lafie.Mobile.slnx à part)
+├── clients                         ← FRONTEND (hors solution .NET, toolchain Node)
+│   └── web                         React + TypeScript + Vite (SPA) + Dockerfile (nginx)
 └── tests
     ├── Lafie.ArchitectureTests     frontières de modules (NetArchTest/ArchUnitNET)
     ├── <Module>.UnitTests          domaine + handlers
     └── Lafie.IntegrationTests      Postgres (Testcontainers)
 ```
 
-> **Séparation clients / backend.** Les frontends vivent sous `clients/`, hors du backend `src/`. **MAUI est isolé** : `Lafie.slnx` (donc `dotnet build`, l'image Docker et la CI serveur) ne contient **aucun projet MAUI** → pas de workload MAUI requise côté backend. Quand `Lafie.Mobile` sera créé, il ira dans sa propre solution `Lafie.Mobile.slnx` et référencera la RCL `Lafie.Ui`. L'image Docker de l'API ne restaure/publie que `Lafie.Api` (clients exclus via `.dockerignore`).
+> **Séparation clients / backend.** Le frontend est une **SPA React + TypeScript (Vite)** sous `clients/web`, avec sa **propre toolchain Node** et son **propre `Dockerfile`** (build Node → **nginx**). Il **ne fait pas partie de la solution .NET** (`Lafie.slnx` = backend + tests). Client **fin** : il consomme l'API par HTTP via **`/api`** (proxy nginx en conteneur, proxy Vite en dev → pas de CORS). L'image Docker de l'API n'inclut pas les clients (`clients/` exclu via `.dockerignore`). **Mobile** : ultérieur (React Native ou PWA), hors périmètre actuel.
 
 Chaque module sous `Modules/` = **4 projets** : `Lafie.<Module>.Domain`, `.Application`, `.Infrastructure`, `.Api`.
 
@@ -102,9 +99,9 @@ Frontières vérifiées en CI par **tests d'architecture**.
 
 ## 9. Clients (validé : clients fins, domaine serveur)
 
-- **Clients séparés du backend** dans `clients/` (voir §2). UI partagée via la RCL **`Lafie.Ui`**, consommée par `Lafie.Web` (Blazor Web) et `Lafie.Mobile` (Blazor Hybrid) → même UI, plusieurs cibles.
-- **MAUI isolé** : hors `Lafie.slnx` (sa propre solution), pour que le build/CI/Docker du backend n'exige pas la workload MAUI.
-- Clients **fins** : logique domaine côté **serveur** via `Lafie.Api`. Offline MAUI = extension future (sous-ensemble local + synchro), non retenue au départ.
+- **Frontend = SPA React + TypeScript (Vite)** sous `clients/web`, séparé du backend (toolchain Node, Dockerfile nginx propre). Voir §2.
+- Client **fin** : toute la logique domaine reste **côté serveur** (`Lafie.Api`) ; le front consomme l'API par HTTP via `/api` (proxy nginx/Vite).
+- **Mobile** : ultérieur — **React Native** (partage de code TS avec le web) ou **PWA**. Non retenu au départ.
 
 ## 10. Transverses
 
@@ -127,7 +124,7 @@ AuthN/Z (OIDC + scopes SMART on FHIR) · Audit ATNA (`BuildingBlocks/Infrastruct
 | Doc API | OpenAPI + Scalar |
 | Observabilité | Serilog + OpenTelemetry |
 | Events | Outbox + bus in-process (abstraction broker-ready) |
-| UI | MAUI Blazor Hybrid + Blazor Web + RCL partagée |
+| Frontend | React + TypeScript + Vite (SPA) ; nginx en conteneur |
 | Tests archi | NetArchTest / ArchUnitNET |
 | Tests intégration | Testcontainers (PostgreSQL) |
 | Observabilité | OpenTelemetry |
@@ -146,7 +143,7 @@ Contenu prévu du squelette (à créer sur **go explicite**) :
 
 ## 13. État du squelette (livré le 2026-07-21)
 
-Squelette **Phase 0 créé** : `Lafie.slnx` (format solution XML .NET 10) + **27 projets** (backend + Web + Ui + tests).
+Squelette **Phase 0 créé** : `Lafie.slnx` (format solution XML .NET 10) + **25 projets** (backend + tests ; le frontend React est hors solution .NET).
 
 - **Build** : `dotnet build Lafie.slnx` → **0 erreur, 0 warning**.
 - **Tests d'architecture** : 3 règles (isolation Domain, indépendance des modules, isolation SharedKernel) — vertes quand l'environnement autorise le chargement des DLL.
@@ -170,5 +167,5 @@ Squelette **Phase 0 créé** : `Lafie.slnx` (format solution XML .NET 10) + **27
 ### Gotchas environnement (machine de dev)
 
 - **Format solution** : `.NET 10` génère `Lafie.slnx` (XML), pas `.sln`. Commandes : `dotnet build Lafie.slnx`.
-- **`Lafie.Mobile` (MAUI) non scaffoldé** : charge de travail MAUI absente. Voir `clients/Lafie.Mobile/README.md` (`dotnet workload install maui` requis).
+- **Frontend React** (`clients/web`) : SPA React+TS+Vite, `docker compose up` la sert sur **http://localhost:3000** (nginx), proxy `/api` → backend. Mobile natif = ultérieur (React Native/PWA).
 - ⚠️ **Smart App Control (Enforce)** bloque l'exécution/chargement des DLL locales non signées (`0x800711C7`, non déterministe). Le **build réussit** ; **exécuter `Lafie.Api` et certains runs de tests échouent** tant que SAC n'est pas contourné. Options : WSL2/Docker Linux (recommandé, SAC ne s'y applique pas), désactiver SAC (irréversible), ou signer les assemblies. Décision reportée.

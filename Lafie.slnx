@@ -1,8 +1,4 @@
 <Solution>
-  <Folder Name="/clients/">
-    <Project Path="clients/Lafie.Ui/Lafie.Ui.csproj" />
-    <Project Path="clients/Lafie.Web/Lafie.Web.csproj" />
-  </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Api/">
     <Project Path="src/Api/Lafie.Api/Lafie.Api.csproj" />

@@ -11,7 +11,7 @@ Base normative : **Guide d'Implémentation FHIR « Mesures de santé »** de l'A
 - Version IG : **3.2.0** (dernière release) — FHIR **R4 (4.0.1)** — Juridiction : France
 - Docs synchronisées sur `main` HEAD au **2026-07-07** (10 commits post-release 3.2.0 déjà intégrés ; non encore publiés en release officielle)
 
-Ces documents synthétisent l'IG (écrit en FHIR Shorthand / FSH) sous une forme directement exploitable pour coder les modules Lafie (modular monolith DDD, C#, MAUI Blazor, CQRS/event-driven, PostgreSQL).
+Ces documents synthétisent l'IG (écrit en FHIR Shorthand / FSH) sous une forme directement exploitable pour coder les modules Lafie (modular monolith DDD, C#, CQRS/event-driven, PostgreSQL/Dapper ; frontend React/TS/Vite).
 
 ## Sommaire
 

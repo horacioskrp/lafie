@@ -1,6 +1,6 @@
 # 06 — Design des « conformance packs »
 
-Comment traduire la conformité multi-juridiction dans l'architecture Lafie (**modular monolith C# / DDD / CQRS event-driven / PostgreSQL / MAUI Blazor**), sans polluer le noyau avec des règles nationales.
+Comment traduire la conformité multi-juridiction dans l'architecture Lafie (**modular monolith C# / DDD / CQRS event-driven / PostgreSQL** ; frontend **React/TS/Vite**), sans polluer le noyau avec des règles nationales.
 
 ## Principe
 
@@ -62,11 +62,11 @@ Chaque `Conformance.*` = un ou plusieurs **modules DDD isolés**, communication 
   - US: `hl7.fhir.us.core`.
 - **Valider en amont** (avant tout échange réseau) selon le pack, pour éviter les rejets côté systèmes nationaux.
 
-## Partage entre MAUI et Blazor
+## Backend et frontend
 
-- Noyau + ports + Firely = **bibliothèques .NET partagées** entre cibles MAUI (desktop/mobile) et Blazor (web).
-- Une seule source de vérité pour les règles de validation domaine ; plusieurs UI.
-- Le pack actif est injecté (DI) selon le tenant/déploiement.
+- Toute la logique (noyau + ports + Firely + validation) reste **côté serveur** (.NET) : source de vérité unique.
+- Le **frontend React/TS (Vite)** consomme l'API par HTTP ; aucune règle de conformité n'y est dupliquée.
+- Le pack actif est injecté (DI) côté serveur selon le tenant/déploiement.
 
 ## Trajectoire recommandée
 

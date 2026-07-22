@@ -1,6 +1,6 @@
 # 06 — Correspondance IG ANS ↔ architecture Lafie (pack France)
 
-Comment le socle FHIR « Mesures de santé » se traduit dans l'architecture cible de Lafie : **modular monolith C# / DDD / CQRS event-driven / PostgreSQL / MAUI Blazor**.
+Comment le socle FHIR « Mesures de santé » se traduit dans l'architecture cible de Lafie : **modular monolith C# / DDD / CQRS event-driven / PostgreSQL** ; frontend **React/TS/Vite**.
 
 > ⚠️ **Portée France.** Ce mapping concerne le **pack France (ANS)** uniquement (INS, MES, HDS, fr-core…). Pour la cible réelle **multi-juridiction** (Togo/UE/USA) et le design des packs enfichables, voir [`docs/conformite/06-conformance-packs.md`](../conformite/06-conformance-packs.md). Les contextes ci-dessous (`Measurements`, `Biology`, `Devices`, `Terminology`, `Interop`) appartiennent au **noyau agnostique** ; seuls les éléments **INS / MES / HDS / profils ANS** sont spécifiques au pack France.
 
@@ -60,11 +60,11 @@ Command  SubmitMeasurement(cmd)
 - Client HTTP FHIR authentifié (OAuth : id_token, access_token, idPe, consentement) vers l'entrepôt **MES**.
 - URL canoniques des profils = `https://interop.esante.gouv.fr/ig/fhir/mesures/StructureDefinition/<id>`.
 
-## MAUI Blazor (multi-version)
+## Frontend (React/TS/Vite)
 
-- Le socle domaine + interop est **partagé** (bibliothèques .NET communes) entre les cibles MAUI (desktop/mobile) et Blazor (web).
-- La saisie de mesures (formulaires par type) consomme les mêmes règles de validation domaine → une seule source de vérité, plusieurs UI.
-- Les objets connectés (PhdDevice) : capter la mesure côté MAUI (natif device) puis passer par le même pipeline CQRS.
+- Le socle domaine + interop reste **côté serveur** (.NET) ; le front React consomme l'API par HTTP.
+- La saisie de mesures (formulaires par type) applique les règles de validation **côté serveur** → une seule source de vérité.
+- Les objets connectés (PhdDevice) : capture ultérieure côté mobile (React Native / passerelle device), puis même pipeline CQRS serveur.
 
 ## Prochaines étapes suggérées (non engagées)
 

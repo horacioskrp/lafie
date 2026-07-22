@@ -31,7 +31,7 @@ Identifiants pivots : `StudyInstanceUID`, `SeriesInstanceUID`, `SOPInstanceUID` 
 | **QIDO-RS** | Query (recherche d'études/séries/instances) |
 | **WADO-RS / WADO-URI** | Retrieve (récupération d'objets, métadonnées, rendus) |
 
-> Pour des clients **Blazor / MAUI**, privilégier **DICOMweb** (HTTP/JSON) plutôt que le DIMSE classique.
+> Pour un client **web (React)**, privilégier **DICOMweb** (HTTP/JSON) plutôt que le DIMSE classique.
 
 ## Place dans l'architecture Lafie
 
@@ -59,7 +59,7 @@ Ne pas exposer les identifiants DICOM comme identité patient : rapprocher via l
 ## Implémentation .NET
 
 - **fo-dicom (Fellow Oak DICOM)** — bibliothèque .NET de référence : parsing, réseau **SCU/SCP** (C-STORE/C-FIND/MWL/MPPS), **client DICOMweb** (STOW/QIDO/WADO), codecs de transfert (JPEG, JPEG2000), rendu d'images.
-- **Visualisation** : consommer DICOMweb depuis un **viewer web** (type OHIF) ou rendre des frames côté serveur. Éviter d'embarquer le pixel data dans l'UI Blazor directement.
+- **Visualisation** : consommer DICOMweb depuis un **viewer web** (type OHIF, intégrable dans le front React) ou rendre des frames côté serveur. Éviter d'embarquer le pixel data brut dans l'UI directement.
 
 ## Sécurité & conformité
 

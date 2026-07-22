@@ -31,5 +31,13 @@ services:
       # 8080 souvent pris sur l'hôte -> exposition sur 8081.
       - "8081:8080"
 
+  web:
+    build: ./clients/web
+    container_name: lafie-web
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
+
 volumes:
   lafie_pgdata:

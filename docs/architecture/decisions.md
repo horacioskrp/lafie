@@ -51,9 +51,9 @@ Décisions structurantes de Lafie. Format léger. Statut au 2026-07-21 : **valid
 
 ## ADR-006 — Clients fins, domaine côté serveur ✅ validé
 
-**Décision.** MAUI Blazor Hybrid + Blazor Web consomment `Lafie.Api` ; logique domaine côté serveur ; UI partagée via Razor Class Library.
-**Pourquoi.** Une seule source de vérité métier ; « plusieurs versions depuis un socle » via composants partagés.
-**Conséquence.** Offline-first MAUI = extension future (sous-ensemble local + synchro), non retenue au départ. À rouvrir si la connectivité terrain au Togo l'impose.
+**Décision.** Frontend = **SPA React + TypeScript (Vite)** consommant `Lafie.Api` par HTTP ; logique domaine côté serveur. (Remplace le choix initial MAUI/Blazor — voir ADR-012.)
+**Pourquoi.** Une seule source de vérité métier côté serveur ; client fin découplé.
+**Conséquence.** Mobile = extension future (React Native, partage de code TS, ou PWA), non retenue au départ. À rouvrir selon connectivité terrain au Togo.
 
 ## ADR-007 — FHIR R4 + IPS comme pivot ; Firely SDK
 
@@ -67,11 +67,11 @@ Décisions structurantes de Lafie. Format léger. Statut au 2026-07-21 : **valid
 **Pourquoi.** Figer les frontières avant d'écrire du domaine.
 **Conséquence.** Voir la section 11 de [README.md](README.md). Création **en attente d'un go explicite**.
 
-## ADR-012 — Clients séparés du backend + MAUI isolé ✅ validé
+## ADR-012 — Frontend React/TS/Vite (remplace les clients C#) ✅ validé
 
-**Décision.** Les frontends vivent sous `clients/` (`Lafie.Web`, `Lafie.Ui` RCL partagée, `Lafie.Mobile`), séparés du backend `src/`. **MAUI est hors `Lafie.slnx`** (sa propre solution `Lafie.Mobile.slnx`).
-**Pourquoi.** (1) Les workloads MAUI casseraient `dotnet build` du backend pour qui ne les a pas ; (2) cycles de vie/CI distincts ; (3) clients fins = HTTP only, aucune dépendance de compilation vers le backend.
-**Conséquence.** `Lafie.slnx` = backend + Web + Ui + tests (aucun MAUI). `Lafie.Backend.slnf` = filtre backend + tests (CI serveur ; filtre `.slnf` sur `.slnx` vérifié fonctionnel). Image Docker : ne restaure/publie que `Lafie.Api`, `clients/` exclu via `.dockerignore`. `Lafie.Ui` partagée par Web et (futur) Mobile.
+**Décision.** Le frontend est une **SPA React + TypeScript (Vite)** sous `clients/web`. Les projets clients C# (Blazor `Lafie.Web`, RCL `Lafie.Ui`, MAUI `Lafie.Mobile`) sont **supprimés**. Le filtre `Lafie.Backend.slnf` est retiré (redondant : `Lafie.slnx` = backend + tests).
+**Pourquoi.** Choix de l'utilisateur (2026-07-22). Écosystème front JS/TS plus large ; découplage total front/back ; toolchain Node indépendante de la solution .NET.
+**Conséquence.** `clients/web` = React/TS/Vite avec son propre `Dockerfile` (build Node → **nginx**). Le front consomme l'API via **`/api`** (proxy nginx en conteneur, proxy Vite en dev → pas de CORS). `docker-compose` ajoute un service `web` (`3000:80`). L'image API reste découplée (`clients/` dans `.dockerignore`). **Mobile** : ultérieur (React Native / PWA). Remplace ADR-006 (clients MAUI/Blazor).
 
 ## ADR-011 — Stack étendue (Mediator source-gen, Finbuckle, JWT+Identity, obs.) ✅ validé
 
@@ -81,13 +81,13 @@ Décisions structurantes de Lafie. Format léger. Statut au 2026-07-21 : **valid
 
 ## Stack retenue
 
-.NET 10 · ASP.NET Core · Firely `Hl7.Fhir.R4` · **Dapper + Npgsql** · FluentValidation · Outbox/bus in-process · Docker Compose (Postgres) · MAUI Blazor Hybrid + Blazor Web + RCL · NetArchTest/ArchUnitNET · OpenTelemetry.
+.NET 10 · ASP.NET Core · Firely `Hl7.Fhir.R4` · **Dapper + Npgsql** · FluentValidation · Outbox/bus in-process · Docker Compose (Postgres + web) · **React + TypeScript + Vite** (frontend, nginx) · NetArchTest/ArchUnitNET · OpenTelemetry.
 
 Solution au format **`Lafie.slnx`** (XML, défaut .NET 10). Squelette Phase 0 livré (26 projets, build 0/0). ⚠️ Gotcha : **Smart App Control (Enforce)** bloque le chargement des DLL locales non signées (`0x800711C7`) → exécution du host reportée (WSL/Docker ou désactivation SAC). Détails : [README.md](README.md) §13.
 
 ## Points à trancher plus tard
 
 - Qualification **DM logiciel** (MDR UE + FDA US) si aide à la décision clinique → conditionne ISO 13485/14971/IEC 62304.
-- Offline-first MAUI selon connectivité Togo.
+- Mobile (React Native / PWA) selon connectivité Togo.
 - Passage éventuel à un broker externe (si extraction de modules).
 - Adoption **.NET Aspire** pour l'orchestration locale (optionnel).

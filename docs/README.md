@@ -2,7 +2,7 @@
 
 **Lafie** — plateforme open source de gestion hospitalière et de dossier médical électronique (**HIS/EMR**), moderne, modulaire et interopérable.
 
-**Architecture cible :** C# **modular monolith** en **DDD**, **MAUI Blazor** (multi-version desktop/mobile/web), communication **event-driven + CQRS**, **PostgreSQL**, interopérabilité **HL7 / FHIR**.
+**Architecture cible :** C# **modular monolith** en **DDD**, communication **event-driven + CQRS**, **PostgreSQL** (Dapper), interopérabilité **HL7 / FHIR**. **Frontend : SPA React + TypeScript (Vite)** ; mobile ultérieur (React Native / PWA).
 
 **Cibles de déploiement :** **Togo** (principale), **Europe** (UE), **USA** (si possible).
 
@@ -12,7 +12,7 @@
 
 | Dossier | Contenu |
 | --- | --- |
-| [`architecture/`](architecture/README.md) | **Architecture validée** : modular monolith DDD/CQRS, découpage solution .NET, packs enfichables, persistance, clients MAUI/Blazor, stack + journal des décisions (ADR) + [catalogue des modules](architecture/modules.md). |
+| [`architecture/`](architecture/README.md) | **Architecture validée** : modular monolith DDD/CQRS, découpage solution .NET, packs enfichables, persistance Dapper, frontend React/Vite, stack + journal des décisions (ADR) + [catalogue des modules](architecture/modules.md). |
 | [`conformite/`](conformite/README.md) | **Cadre de conformité multi-juridiction** : socle international, packs Togo / UE / USA, protection des données, design des conformance packs. **Point d'entrée pour la stratégie d'interopérabilité.** |
 | [`standards/`](standards/dicom.md) | **Normes techniques internationales** (deep-dives). Aujourd'hui : [DICOM](standards/dicom.md) (imagerie). |
 | [`fhir/`](fhir/README.md) | **Pack France (ANS)** — IG FHIR « Mesures de santé » : profils Observation, extensions, terminologies, flux Bundle. Sert aussi de **modèle de bonnes pratiques** FHIR pour les autres packs. |
