@@ -13,14 +13,11 @@ Un seul déployable. Frontières de modules strictes → extraction en services 
 ## 2. Structure de la solution
 
 ```
-Lafie.sln
-├── src
+Lafie.slnx                          backend + Web + Ui + tests (SANS MAUI)
+Lafie.Backend.slnf                  filtre : backend + tests seuls (CI serveur)
+├── src                             ← BACKEND
 │   ├── Api
 │   │   └── Lafie.Api               ASP.NET Core host, FHIR REST facade, SMART on FHIR, composition des modules
-│   ├── Web
-│   │   └── Lafie.Web               Blazor Web App
-│   ├── Mobile
-│   │   └── Lafie.Mobile            MAUI Blazor Hybrid (desktop/mobile)
 │   ├── BuildingBlocks
 │   │   ├── Lafie.SharedKernel      types domaine de base (AggregateRoot, ValueObject, DomainEvent, Result)
 │   │   ├── Lafie.Shared            contrats inter-modules : integration events, API publiques,
@@ -38,11 +35,17 @@ Lafie.sln
 │       ├── Terminology   (ajouté)  service multi-code (LOINC/SNOMED/ICD/ATC), validation de binding
 │       └── Interop       (ajouté)  FHIR Gateway (IPS/Bundle), connecteur DHIS2, échange documents,
 │                                   ADAPTERS de conformité par pays (Togo/UE/US/FR)
+├── clients                         ← FRONTENDS (séparés du backend)
+│   ├── Lafie.Web                   Blazor Web App
+│   ├── Lafie.Ui                    Razor Class Library partagée (Web + Mobile)
+│   └── Lafie.Mobile                MAUI Blazor Hybrid — placeholder, ISOLÉ (solution Lafie.Mobile.slnx à part)
 └── tests
     ├── Lafie.ArchitectureTests     frontières de modules (NetArchTest/ArchUnitNET)
     ├── <Module>.UnitTests          domaine + handlers
     └── Lafie.IntegrationTests      Postgres (Testcontainers)
 ```
+
+> **Séparation clients / backend.** Les frontends vivent sous `clients/`, hors du backend `src/`. **MAUI est isolé** : `Lafie.slnx` (donc `dotnet build`, l'image Docker et la CI serveur) ne contient **aucun projet MAUI** → pas de workload MAUI requise côté backend. Quand `Lafie.Mobile` sera créé, il ira dans sa propre solution `Lafie.Mobile.slnx` et référencera la RCL `Lafie.Ui`. L'image Docker de l'API ne restaure/publie que `Lafie.Api` (clients exclus via `.dockerignore`).
 
 Chaque module sous `Modules/` = **4 projets** : `Lafie.<Module>.Domain`, `.Application`, `.Infrastructure`, `.Api`.
 
@@ -99,10 +102,9 @@ Frontières vérifiées en CI par **tests d'architecture**.
 
 ## 9. Clients (validé : clients fins, domaine serveur)
 
-- UI partagée via **Razor Class Library** consommée par `Lafie.Web` (Blazor Web) et `Lafie.Mobile` (Blazor Hybrid) → même UI, plusieurs cibles depuis un socle.
+- **Clients séparés du backend** dans `clients/` (voir §2). UI partagée via la RCL **`Lafie.Ui`**, consommée par `Lafie.Web` (Blazor Web) et `Lafie.Mobile` (Blazor Hybrid) → même UI, plusieurs cibles.
+- **MAUI isolé** : hors `Lafie.slnx` (sa propre solution), pour que le build/CI/Docker du backend n'exige pas la workload MAUI.
 - Clients **fins** : logique domaine côté **serveur** via `Lafie.Api`. Offline MAUI = extension future (sous-ensemble local + synchro), non retenue au départ.
-
-> Note : la RCL partagée peut être un 4e projet sous `Web/` (ex. `Lafie.Web.Shared` / `Lafie.Ui`) référencé par Web et Mobile — à créer au moment des clients.
 
 ## 10. Transverses
 
@@ -144,7 +146,7 @@ Contenu prévu du squelette (à créer sur **go explicite**) :
 
 ## 13. État du squelette (livré le 2026-07-21)
 
-Squelette **Phase 0 créé** : `Lafie.slnx` (format solution XML .NET 10) + **26 projets**.
+Squelette **Phase 0 créé** : `Lafie.slnx` (format solution XML .NET 10) + **27 projets** (backend + Web + Ui + tests).
 
 - **Build** : `dotnet build Lafie.slnx` → **0 erreur, 0 warning**.
 - **Tests d'architecture** : 3 règles (isolation Domain, indépendance des modules, isolation SharedKernel) — vertes quand l'environnement autorise le chargement des DLL.
@@ -168,5 +170,5 @@ Squelette **Phase 0 créé** : `Lafie.slnx` (format solution XML .NET 10) + **26
 ### Gotchas environnement (machine de dev)
 
 - **Format solution** : `.NET 10` génère `Lafie.slnx` (XML), pas `.sln`. Commandes : `dotnet build Lafie.slnx`.
-- **`Lafie.Mobile` (MAUI) non scaffoldé** : charge de travail MAUI absente. Voir `src/Mobile/README.md` (`dotnet workload install maui` requis).
+- **`Lafie.Mobile` (MAUI) non scaffoldé** : charge de travail MAUI absente. Voir `clients/Lafie.Mobile/README.md` (`dotnet workload install maui` requis).
 - ⚠️ **Smart App Control (Enforce)** bloque l'exécution/chargement des DLL locales non signées (`0x800711C7`, non déterministe). Le **build réussit** ; **exécuter `Lafie.Api` et certains runs de tests échouent** tant que SAC n'est pas contourné. Options : WSL2/Docker Linux (recommandé, SAC ne s'y applique pas), désactiver SAC (irréversible), ou signer les assemblies. Décision reportée.

@@ -22,7 +22,7 @@ Décisions structurantes de Lafie. Format léger. Statut au 2026-07-21 : **valid
 
 ## ADR-003 — CQRS pragmatique (pas d'event sourcing initial) ✅ validé
 
-**Décision.** Séparation commands/queries (MediatR). Read model = projections dans la même base. **Pas d'event sourcing** au départ.
+**Décision.** Séparation commands/queries (**Mediator**, source-generated — cf. ADR-011). Read model = projections / requêtes SQL dédiées. **Pas d'event sourcing** au départ.
 **Pourquoi.** Simplicité et vitesse de livraison ; l'ES ajoute une complexité non justifiée maintenant.
 **Conséquence.** Event sourcing activable **par module** plus tard si un besoin d'audit/temporalité l'exige. Domain events dispatchés vers integration events via Outbox.
 
@@ -66,6 +66,12 @@ Décisions structurantes de Lafie. Format léger. Statut au 2026-07-21 : **valid
 **Décision.** Livrer d'abord la structure de solution (projets, frontières, building blocks, tests d'architecture) **sans logique métier**.
 **Pourquoi.** Figer les frontières avant d'écrire du domaine.
 **Conséquence.** Voir la section 11 de [README.md](README.md). Création **en attente d'un go explicite**.
+
+## ADR-012 — Clients séparés du backend + MAUI isolé ✅ validé
+
+**Décision.** Les frontends vivent sous `clients/` (`Lafie.Web`, `Lafie.Ui` RCL partagée, `Lafie.Mobile`), séparés du backend `src/`. **MAUI est hors `Lafie.slnx`** (sa propre solution `Lafie.Mobile.slnx`).
+**Pourquoi.** (1) Les workloads MAUI casseraient `dotnet build` du backend pour qui ne les a pas ; (2) cycles de vie/CI distincts ; (3) clients fins = HTTP only, aucune dépendance de compilation vers le backend.
+**Conséquence.** `Lafie.slnx` = backend + Web + Ui + tests (aucun MAUI). `Lafie.Backend.slnf` = filtre backend + tests (CI serveur ; filtre `.slnf` sur `.slnx` vérifié fonctionnel). Image Docker : ne restaure/publie que `Lafie.Api`, `clients/` exclu via `.dockerignore`. `Lafie.Ui` partagée par Web et (futur) Mobile.
 
 ## ADR-011 — Stack étendue (Mediator source-gen, Finbuckle, JWT+Identity, obs.) ✅ validé
 

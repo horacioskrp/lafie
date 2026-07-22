@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/clients/">
+    <Project Path="clients/Lafie.Ui/Lafie.Ui.csproj" />
+    <Project Path="clients/Lafie.Web/Lafie.Web.csproj" />
+  </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Api/">
     <Project Path="src/Api/Lafie.Api/Lafie.Api.csproj" />
@@ -38,9 +42,6 @@
     <Project Path="src/Modules/Terminology/Lafie.Terminology.Application/Lafie.Terminology.Application.csproj" />
     <Project Path="src/Modules/Terminology/Lafie.Terminology.Domain/Lafie.Terminology.Domain.csproj" />
     <Project Path="src/Modules/Terminology/Lafie.Terminology.Infrastructure/Lafie.Terminology.Infrastructure.csproj" />
-  </Folder>
-  <Folder Name="/src/Web/">
-    <Project Path="src/Web/Lafie.Web/Lafie.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Lafie.ArchitectureTests/Lafie.ArchitectureTests.csproj" />

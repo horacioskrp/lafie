@@ -4,5 +4,6 @@
 .idea/
 .vs/
 docs/
+clients/
 **/TestResults/
 *.user
