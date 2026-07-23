@@ -17,6 +17,26 @@ Stack de référence de Lafie. **Persistance = Dapper** (décision utilisateur, 
 | Frontend | **React + TypeScript + Vite** (SPA sous `clients/lafie-navigator`, hors solution .NET) ; **nginx** en conteneur, proxy `/api` → backend. Mobile ultérieur (React Native / PWA) |
 | Conteneurs | **Docker Compose** (Postgres + web ; puis Valkey/MinIO) |
 
+## Frontend (`clients/lafie-navigator`) — détail
+
+> Doc complète (stack + **design system / couleurs** + structure) : [`../frontend/README.md`](../frontend/README.md).
+
+SPA React 19 + TypeScript + Vite. Librairies installées (baseline) :
+
+| Besoin | Choix |
+| --- | --- |
+| UI | **Fluent UI v9** (`@fluentui/react-components`) |
+| Données serveur | **TanStack Query** ; **Router** + **Table** (câblés au besoin) |
+| Formulaires | **React Hook Form** + **`@hookform/resolvers`** (zodResolver) |
+| Validation | **Zod** |
+| i18n | **i18next** + **react-i18next** + language-detector (FR défaut, EN) |
+| Dates/TZ | **Luxon** |
+| Tests | **Vitest** + **Testing Library** (unit/composant sous `src/`) · **Playwright** (e2e sous `e2e/`) |
+| PWA | **vite-plugin-pwa** (installable + cache assets ; offline-data = chantier séparé) |
+| Charts | **différés** : `@fluentui/react-charting` (défaut) + `recharts` (secours) — à installer au 1er graphe (évite le gros arbre Fluent v8 + d3 maintenant) |
+
+Le front consomme l'API via `/api` (proxy nginx en conteneur, proxy Vite en dev). État vérifié : Fluent + Query + i18n (bascule FR/EN) + Luxon rendus, tests Vitest verts, build + PWA OK.
+
 ## Auth & identité
 
 - **JWT** (émission / refresh) + **ASP.NET Identity** : rôles, **permissions fines**, politiques de mot de passe, **auth rate-limitée**, sessions, **impersonation**.

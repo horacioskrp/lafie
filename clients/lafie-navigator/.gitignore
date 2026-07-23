@@ -10,7 +10,15 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dev-dist
 *.local
+
+# tests / e2e
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+coverage
 
 # Editor directories and files
 .vscode/*

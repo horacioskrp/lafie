@@ -1,32 +1,36 @@
-# React + TypeScript + Vite
+# Lafie Navigator
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Frontend web de **Lafie** (HIS/EMR) — SPA **React + TypeScript + Vite**.
+Client fin : consomme l'API .NET via `/api` (proxy nginx en conteneur, proxy Vite en dev).
 
-Currently, two official plugins are available:
+## Stack
+- **Fluent UI v9** (`@fluentui/react-components`)
+- **TanStack** Query (Router + Table câblés au besoin)
+- **React Hook Form** + **Zod** (`zodResolver`)
+- **i18next** / react-i18next (FR défaut, EN)
+- **Luxon** (dates/fuseaux)
+- **Vitest** + Testing Library (`src/`) · **Playwright** (`e2e/`)
+- **vite-plugin-pwa** (installable + cache assets)
+- Charts *différés* : `@fluentui/react-charting` (défaut) + `recharts` (secours) — à ajouter au 1er graphe
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Commandes
+```bash
+npm run dev        # dev server (http://localhost:3000, proxy /api -> :8081)
+npm run build      # tsc -b && vite build (+ PWA)
+npm run test       # Vitest (unit/composant)
+npm run test:e2e   # Playwright (requiert app sur :3000 + npx playwright install)
+npm run lint       # oxlint
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Docker
+Servie par nginx via `docker compose up --build web` (à la racine du repo) → http://localhost:3000.
+Voir `Dockerfile` + `nginx.conf` (proxy `/api` → backend).
+
+## Thème / couleurs (`src/theme.ts`)
+- **Primaire (action/focus)** : `#00728B` → rampe de marque Fluent (`lafieBrand`, `createLightTheme`).
+- **Secondaire (accents/badges/états positifs)** : `#009664` (`lafieColors.secondary`).
+- **Dégradé** (`lafieColors.gradient`, `#00728B`→`#009664`) : avec **parcimonie** (bannière, splash, header de pass santé).
+- **Fond** : `#F4F8FA` (bleuté clair, moins de fatigue visuelle que le blanc pur) — `src/index.css`.
+
+> Rampe de marque approximée à la main ; affinable via le Fluent UI Theme Designer.
+> Gotcha PWA : après un rebuild, recharger la page pour que le service worker serve les assets à jour.

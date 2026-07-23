@@ -14,6 +14,7 @@
 | --- | --- |
 | [`architecture/`](architecture/README.md) | **Architecture validée** : modular monolith DDD/CQRS, découpage solution .NET, packs enfichables, persistance Dapper, frontend React/Vite, stack + journal des décisions (ADR) + [catalogue des modules](architecture/modules.md). |
 | [`conformite/`](conformite/README.md) | **Cadre de conformité multi-juridiction** : socle international, packs Togo / UE / USA, protection des données, design des conformance packs. **Point d'entrée pour la stratégie d'interopérabilité.** |
+| [`frontend/`](frontend/README.md) | **Frontend & Design System** : stack React/TS/Vite (Fluent UI, TanStack, RHF+Zod, i18next, Luxon, tests, PWA) + **palette de couleurs** et thème. |
 | [`standards/`](standards/dicom.md) | **Normes techniques internationales** (deep-dives). Aujourd'hui : [DICOM](standards/dicom.md) (imagerie). |
 | [`fhir/`](fhir/README.md) | **Pack France (ANS)** — IG FHIR « Mesures de santé » : profils Observation, extensions, terminologies, flux Bundle. Sert aussi de **modèle de bonnes pratiques** FHIR pour les autres packs. |
 

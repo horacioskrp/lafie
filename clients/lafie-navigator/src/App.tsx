@@ -1,38 +1,116 @@
-import { useEffect, useState } from 'react'
-import './App.css'
+import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
+import { DateTime } from 'luxon'
+import {
+  Body1,
+  Button,
+  Caption1,
+  Card,
+  CardHeader,
+  Spinner,
+  Subtitle2,
+  Title2,
+  makeStyles,
+  tokens,
+} from '@fluentui/react-components'
 
-type Health = { status: string; phase: string }
+const useStyles = makeStyles({
+  root: {
+    maxWidth: '680px',
+    margin: '0 auto',
+    padding: tokens.spacingVerticalXXL,
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: tokens.spacingVerticalL,
+  },
+  topbar: { display: 'flex', justifyContent: 'flex-end' },
+  // Dégradé utilisé avec parcimonie : bannière d'en-tête uniquement.
+  banner: {
+    backgroundImage: 'linear-gradient(135deg, #00728B 0%, #009664 100%)',
+    color: tokens.colorNeutralForegroundOnBrand,
+    borderRadius: tokens.borderRadiusXLarge,
+    padding: `${tokens.spacingVerticalXL} ${tokens.spacingHorizontalXL}`,
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: tokens.spacingVerticalXS,
+  },
+  bannerTitle: { color: tokens.colorNeutralForegroundOnBrand },
+  bannerSubtitle: { color: tokens.colorNeutralForegroundOnBrand, opacity: 0.9 },
+  row: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  status: { display: 'inline-flex', alignItems: 'center', columnGap: tokens.spacingHorizontalXS },
+  dot: { width: '10px', height: '10px', borderRadius: '50%', display: 'inline-block' },
+  dotOk: { backgroundColor: '#009664' }, // secondaire = état positif / santé
+  dotKo: { backgroundColor: tokens.colorPaletteRedBackground3 },
+})
+
+async function getJson<T>(url: string): Promise<T> {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json() as Promise<T>
+}
 
 function App() {
-  const [api, setApi] = useState<string>('…')
-  const [db, setDb] = useState<string>('…')
+  const styles = useStyles()
+  const { t, i18n } = useTranslation()
 
-  useEffect(() => {
-    fetch('/api/health')
-      .then((r) => r.json() as Promise<Health>)
-      .then((h) => setApi(`ok (${h.phase})`))
-      .catch(() => setApi('injoignable'))
+  const health = useQuery({
+    queryKey: ['health'],
+    queryFn: () => getJson<{ status: string; phase: string }>('/api/health'),
+  })
+  const db = useQuery({
+    queryKey: ['health-db'],
+    queryFn: () => getJson<{ database: string }>('/api/health/db'),
+  })
 
-    fetch('/api/health/db')
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d: { database: string }) => setDb(d.database))
-      .catch(() => setDb('injoignable'))
-  }, [])
+  const toggleLang = () => i18n.changeLanguage(i18n.language.startsWith('fr') ? 'en' : 'fr')
+
+  const statusView = (
+    isPending: boolean,
+    isError: boolean,
+    okLabel: string,
+  ) => {
+    if (isPending) return <Spinner size="tiny" />
+    const ok = !isError
+    return (
+      <span className={styles.status}>
+        <span className={`${styles.dot} ${ok ? styles.dotOk : styles.dotKo}`} />
+        <Body1>{ok ? okLabel : t('unreachable')}</Body1>
+      </span>
+    )
+  }
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: '2rem', maxWidth: 640, margin: '0 auto' }}>
-      <h1>Lafie</h1>
-      <p>Plateforme HIS/EMR — front React + TypeScript (Vite).</p>
+    <main className={styles.root}>
+      <div className={styles.topbar}>
+        <Button appearance="secondary" onClick={toggleLang}>
+          {t('switchLang')}
+        </Button>
+      </div>
 
-      <section style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '.05em', opacity: 0.7 }}>
-          État du backend
-        </h2>
-        <ul style={{ lineHeight: 1.9 }}>
-          <li>API (<code>/api/health</code>) : <strong>{api}</strong></li>
-          <li>Base de données (<code>/api/health/db</code>) : <strong>{db}</strong></li>
-        </ul>
+      <section className={styles.banner}>
+        <Title2 className={styles.bannerTitle}>{t('appTitle')}</Title2>
+        <Body1 className={styles.bannerSubtitle}>{t('appSubtitle')}</Body1>
       </section>
+
+      <Card>
+        <CardHeader header={<Subtitle2>{t('backendState')}</Subtitle2>} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 8 }}>
+          <div className={styles.row}>
+            <Body1>{t('api')}</Body1>
+            {statusView(
+              health.isPending,
+              health.isError,
+              health.data ? `${t('reachable')} (${health.data.phase})` : t('reachable'),
+            )}
+          </div>
+          <div className={styles.row}>
+            <Body1>{t('database')}</Body1>
+            {statusView(db.isPending, db.isError, db.data?.database ?? t('reachable'))}
+          </div>
+        </div>
+      </Card>
+
+      <Caption1>{t('updatedAt', { time: DateTime.now().toLocaleString(DateTime.TIME_WITH_SECONDS) })}</Caption1>
     </main>
   )
 }

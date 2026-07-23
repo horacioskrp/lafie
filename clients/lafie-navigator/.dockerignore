@@ -1,5 +1,9 @@
 node_modules
 dist
+dev-dist
 .git
 .dockerignore
 Dockerfile
+playwright-report
+test-results
+coverage
