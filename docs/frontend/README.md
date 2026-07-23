@@ -63,23 +63,71 @@ Palette accessible, ton santé/océan.
 - **Fond** : `#F4F8FA` pour le canevas ; les cartes/surfaces restent en `colorNeutralBackground1` (blanc) pour le contraste.
 - **Accessibilité** : viser contraste WCAG AA ; Fluent v9 gère l'a11y des composants. Vérifier le texte sur dégradé (utiliser `colorNeutralForegroundOnBrand`).
 
-## 3. Structure
+## 3. Structure — feature-based (vertical slices)
+
+Rangement **par domaine** (miroir des modules backend), pas par type. Inspiré de *bulletproof-react*.
 
 ```
 clients/lafie-navigator/
+├── e2e/                              Playwright
 ├── src/
-│   ├── main.tsx        FluentProvider(theme) + QueryClientProvider + i18n
-│   ├── App.tsx         page d'accueil (bannière dégradé, statuts backend)
-│   ├── theme.ts        rampe de marque + lafieColors
-│   ├── i18n.ts         init i18next (FR/EN)
-│   ├── index.css       fond #F4F8FA, reset minimal
-│   ├── App.test.tsx    tests Vitest/RTL
-│   └── test/setup.ts   jest-dom + stubs jsdom (matchMedia/ResizeObserver)
-├── e2e/                tests Playwright
-├── vite.config.ts      plugins React + PWA, proxy /api, config Vitest
-├── Dockerfile          build Node → nginx
-└── nginx.conf          SPA fallback + proxy /api → backend
+│   ├── main.tsx                      point d'entrée → <AppProviders>
+│   ├── app/                          COMPOSITION ROOT (bootstrap)
+│   │   ├── providers/
+│   │   │   ├── AppProviders.tsx      Fluent(thème) + Query + i18n + Router
+│   │   │   └── queryClient.ts
+│   │   ├── router/router.tsx         TanStack Router (code-based)
+│   │   └── layout/AppShell.tsx       coquille (nav/header à venir) + <Outlet/>
+│   ├── features/                     TRANCHES PAR DOMAINE (miroir backend)
+│   │   └── dashboard/
+│   │       ├── pages/                DashboardPage(.tsx/.test.tsx)
+│   │       ├── api/ components/ model/ hooks/ locales/   (au besoin)
+│   │       └── index.ts              API publique (barrel mince)
+│   ├── shared/                       CROSS-CUTTING réutilisable
+│   │   ├── ui/                       design system (GradientBanner, StatusDot, …)
+│   │   ├── api/http.ts               wrapper HTTP (+ generated/ OpenAPI à venir)
+│   │   ├── theme/theme.ts            rampe de marque + lafieColors
+│   │   ├── i18n/index.ts             init i18next (FR/EN)
+│   │   ├── lib/ config/ hooks/ types/  (au besoin)
+│   ├── styles/index.css              fond #F4F8FA, reset
+│   └── test/setup.ts                 Vitest (jest-dom + stubs jsdom)
+├── vite.config.ts · Dockerfile · nginx.conf · tsconfig.*
 ```
+
+### Règles d'import
+
+| Couche | Peut importer | Interdit |
+| --- | --- | --- |
+| `app/` | `features`, `shared` | — |
+| `features/X` | `shared`, sa propre arbo | internes d'un autre feature |
+| `shared/` | `shared` | `features`, `app` |
+
+- Un feature s'importe **uniquement via son `index.ts`**. Besoin partagé entre 2 features → remonter dans `shared/`.
+
+### Alias de chemins
+
+`@app/*` · `@features/*` · `@shared/*` (configurés dans `tsconfig.app.json` `paths` + `vite.config.ts` `resolve.alias`). Ex : `import { StatusDot } from '@shared/ui'`.
+
+### Optimisation
+
+- **Code-splitting par route** : passer les routes de features en `lazy` quand le bundle grossit (Fluent est volumineux).
+- **i18n en namespaces par feature** (`features/*/locales/`), chargés paresseusement ; commun dans `shared/i18n`.
+- **Barrels minces** (éviter de casser le tree-shaking). Tests colocalisés (`*.test.tsx`) ; e2e séparé.
+
+### Shell applicatif (inspiré Outlook)
+
+`app/layout/AppShell.tsx` = grille CSS **fidèle au shell Outlook** (lui-même en Fluent) :
+
+| Région | Fichier | Contenu |
+| --- | --- | --- |
+| Barre haute (brand) | `TopBar.tsx` | app-launcher, marque **Lafie**, `SearchBox`, bascule langue, notifications (`CounterBadge`), réglages, `Avatar` |
+| Ruban d'actions | `CommandBar.tsx` | `Toolbar` (Nouveau patient, Actualiser…) |
+| Navigation latérale | `SideNav.tsx` | **maison** (Button/Tooltip Fluent stables) : rail collapsible ↔ drawer ; items = modules (miroir backend) |
+| Contenu | `<Outlet/>` | route active |
+
+- Le **contenu d'accueil** = **dashboard widgets** (`features/dashboard` : KPI `StatCard`, agenda du jour, statut système), **pas** un faux 3-panneaux.
+- Le **3-panneaux liste/détail** (`shared/ui/layout/ThreePane`, à venir) est réservé aux modules type Patients (liste → détail), rendu **dans** le contenu du shell.
+- Le hamburger de `TopBar` bascule `SideNav` (rail 48px ↔ drawer 240px).
 
 ## 4. Commandes
 

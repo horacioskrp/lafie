@@ -2,8 +2,8 @@ import { render, screen } from '@testing-library/react'
 import { FluentProvider, webLightTheme } from '@fluentui/react-components'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, expect, test, vi } from 'vitest'
-import './i18n'
-import App from './App'
+import '@shared/i18n'
+import { DashboardPage } from '@features/dashboard'
 
 beforeEach(() => {
   vi.stubGlobal(
@@ -16,23 +16,23 @@ beforeEach(() => {
   )
 })
 
-function renderApp() {
+function renderPage() {
   const queryClient = new QueryClient()
   return render(
     <FluentProvider theme={webLightTheme}>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <DashboardPage />
       </QueryClientProvider>
     </FluentProvider>,
   )
 }
 
-test("affiche le titre de l'application", async () => {
-  renderApp()
-  expect(await screen.findByText('Lafie Navigator')).toBeInTheDocument()
+test('affiche le statut de la base après chargement', async () => {
+  renderPage()
+  expect(await screen.findByText('up')).toBeInTheDocument()
 })
 
-test('affiche la phase de l\'API après chargement', async () => {
-  renderApp()
+test("affiche la phase de l'API après chargement", async () => {
+  renderPage()
   expect(await screen.findByText(/test/)).toBeInTheDocument()
 })

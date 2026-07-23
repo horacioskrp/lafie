@@ -1,4 +1,5 @@
 /// <reference types="vitest/config" />
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -21,6 +22,13 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: {
+      '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
+      '@features': fileURLToPath(new URL('./src/features', import.meta.url)),
+      '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
+    },
+  },
   server: {
     port: 3000,
     // Dev : proxy /api -> backend (Docker api exposée sur l'hôte 8081).

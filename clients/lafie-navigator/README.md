@@ -26,11 +26,11 @@ npm run lint       # oxlint
 Servie par nginx via `docker compose up --build web` (à la racine du repo) → http://localhost:3000.
 Voir `Dockerfile` + `nginx.conf` (proxy `/api` → backend).
 
-## Thème / couleurs (`src/theme.ts`)
+## Thème / couleurs (`src/shared/theme/theme.ts`)
 - **Primaire (action/focus)** : `#00728B` → rampe de marque Fluent (`lafieBrand`, `createLightTheme`).
 - **Secondaire (accents/badges/états positifs)** : `#009664` (`lafieColors.secondary`).
 - **Dégradé** (`lafieColors.gradient`, `#00728B`→`#009664`) : avec **parcimonie** (bannière, splash, header de pass santé).
-- **Fond** : `#F4F8FA` (bleuté clair, moins de fatigue visuelle que le blanc pur) — `src/index.css`.
+- **Fond** : `#F4F8FA` (bleuté clair, moins de fatigue visuelle que le blanc pur) — `src/styles/index.css`.
 
 > Rampe de marque approximée à la main ; affinable via le Fluent UI Theme Designer.
 > Gotcha PWA : après un rebuild, recharger la page pour que le service worker serve les assets à jour.
