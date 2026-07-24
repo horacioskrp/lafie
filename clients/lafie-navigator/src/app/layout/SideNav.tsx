@@ -43,7 +43,13 @@ const useStyles = makeStyles({
   },
 })
 
-export function SideNav({ expanded }: { expanded: boolean }) {
+export function SideNav({
+  expanded,
+  onItemClick,
+}: {
+  expanded: boolean
+  onItemClick?: () => void
+}) {
   const styles = useStyles()
   const { t } = useTranslation()
   const [selected, setSelected] = useState('home')
@@ -56,7 +62,10 @@ export function SideNav({ expanded }: { expanded: boolean }) {
           <Button
             appearance="subtle"
             icon={it.icon}
-            onClick={() => setSelected(it.key)}
+            onClick={() => {
+              setSelected(it.key)
+              onItemClick?.()
+            }}
             className={mergeClasses(
               expanded ? styles.item : styles.itemCollapsed,
               selected === it.key && styles.selected,

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Avatar,
@@ -7,6 +8,7 @@ import {
   Text,
   Tooltip,
   makeStyles,
+  mergeClasses,
   tokens,
 } from '@fluentui/react-components'
 import {
@@ -15,6 +17,7 @@ import {
   Navigation24Regular,
   Settings24Regular,
 } from '@fluentui/react-icons'
+import { SettingsDialog } from '@features/settings'
 
 const useStyles = makeStyles({
   root: {
@@ -33,11 +36,13 @@ const useStyles = makeStyles({
   onBrand: { color: tokens.colorNeutralForegroundOnBrand },
   bell: { position: 'relative' },
   badge: { position: 'absolute', top: '4px', right: '4px' },
+  hideOnMobile: { '@media (max-width: 768px)': { display: 'none' } },
 })
 
 export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const styles = useStyles()
   const { t, i18n } = useTranslation()
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const toggleLang = () => i18n.changeLanguage(i18n.language.startsWith('fr') ? 'en' : 'fr')
 
   return (
@@ -51,7 +56,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       />
       <Button
         appearance="transparent"
-        className={styles.onBrand}
+        className={mergeClasses(styles.onBrand, styles.hideOnMobile)}
         icon={<Apps24Regular />}
         aria-label="Applications"
       />
@@ -62,7 +67,11 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
 
       <div className={styles.right}>
-        <Button appearance="transparent" className={styles.onBrand} onClick={toggleLang}>
+        <Button
+          appearance="transparent"
+          className={mergeClasses(styles.onBrand, styles.hideOnMobile)}
+          onClick={toggleLang}
+        >
           {t('switchLang')}
         </Button>
         <Tooltip content="Notifications" relationship="label">
@@ -82,10 +91,13 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
             className={styles.onBrand}
             icon={<Settings24Regular />}
             aria-label="Réglages"
+            onClick={() => setSettingsOpen(true)}
           />
         </Tooltip>
         <Avatar name="Horacio sKrp" size={28} color="colorful" />
       </div>
+
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </header>
   )
 }

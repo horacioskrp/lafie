@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Outlet } from '@tanstack/react-router'
-import { makeStyles } from '@fluentui/react-components'
+import { DrawerBody, OverlayDrawer, makeStyles } from '@fluentui/react-components'
+import { useIsMobile } from '@shared/hooks'
 import { TopBar } from './TopBar'
 import { CommandBar } from './CommandBar'
 import { SideNav } from './SideNav'
@@ -10,28 +11,53 @@ const useStyles = makeStyles({
     display: 'grid',
     gridTemplateRows: 'auto auto 1fr',
     height: '100vh',
-    backgroundColor: '#f4f8fa',
   },
   body: { display: 'grid', minHeight: 0 },
-  content: { overflowY: 'auto' },
+  content: { overflowY: 'auto', minWidth: 0 },
+  drawerBody: { padding: 0 },
 })
 
-// Coquille applicative fidèle au shell Outlook :
-// barre haute (brand) + ruban d'actions + navigation latérale + contenu.
+// Coquille applicative fidèle au shell Outlook + responsive :
+// - desktop : navigation en colonne (rail 48px ↔ drawer 240px)
+// - mobile  : navigation en overlay drawer (off-canvas), contenu pleine largeur
 export function AppShell() {
   const styles = useStyles()
+  const isMobile = useIsMobile()
   const [expanded, setExpanded] = useState(true)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+
+  const onMenuClick = () => (isMobile ? setMobileNavOpen((o) => !o) : setExpanded((e) => !e))
 
   return (
     <div className={styles.shell}>
-      <TopBar onMenuClick={() => setExpanded((e) => !e)} />
+      <TopBar onMenuClick={onMenuClick} />
       <CommandBar />
-      <div className={styles.body} style={{ gridTemplateColumns: expanded ? '240px 1fr' : '48px 1fr' }}>
-        <SideNav expanded={expanded} />
+
+      {isMobile ? (
         <div className={styles.content}>
           <Outlet />
+          <OverlayDrawer
+            open={mobileNavOpen}
+            onOpenChange={(_, d) => setMobileNavOpen(d.open)}
+            position="start"
+            size="small"
+          >
+            <DrawerBody className={styles.drawerBody}>
+              <SideNav expanded onItemClick={() => setMobileNavOpen(false)} />
+            </DrawerBody>
+          </OverlayDrawer>
         </div>
-      </div>
+      ) : (
+        <div
+          className={styles.body}
+          style={{ gridTemplateColumns: expanded ? '240px 1fr' : '48px 1fr' }}
+        >
+          <SideNav expanded={expanded} />
+          <div className={styles.content}>
+            <Outlet />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

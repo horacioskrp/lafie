@@ -128,6 +128,23 @@ clients/lafie-navigator/
 - Le **contenu d'accueil** = **dashboard widgets** (`features/dashboard` : KPI `StatCard`, agenda du jour, statut système), **pas** un faux 3-panneaux.
 - Le **3-panneaux liste/détail** (`shared/ui/layout/ThreePane`, à venir) est réservé aux modules type Patients (liste → détail), rendu **dans** le contenu du shell.
 - Le hamburger de `TopBar` bascule `SideNav` (rail 48px ↔ drawer 240px).
+- L'icône **⚙ Réglages** ouvre le **`SettingsDialog`** (`features/settings`, façon Outlook) : nav gauche (Langue, Apparence, Notifications, Confidentialité, Recherche) + panneau **Apparence** (mode **Clair/Sombre/Système**, couleurs, barre de navigation).
+
+### Responsive / mobile
+
+Breakpoint **768px** via `shared/hooks/useMediaQuery` (`useIsMobile`).
+
+| | Desktop (> 768px) | Mobile (≤ 768px) |
+| --- | --- | --- |
+| `SideNav` | colonne (rail 48px ↔ drawer 240px) | **overlay drawer** (`OverlayDrawer`) ouvert par le hamburger, fermé au clic d'un item ; contenu pleine largeur |
+| `TopBar` | complet | app-launcher + bascule langue **masqués** (langue → Réglages) ; recherche compressée |
+| `SettingsDialog` | 960×640 centré | **plein écran** ; nav en ligne (scroll horizontal) |
+| Widgets dashboard | grille multi-colonnes | reflow automatique (`auto-fit minmax`) |
+
+### Mode de thème (clair / sombre / système)
+
+- `app/providers/ThemeModeProvider.tsx` pilote le `FluentProvider` : `lafieLightTheme` / `lafieDarkTheme` selon le mode (persisté en `localStorage`, `système` suit `prefers-color-scheme`).
+- Réglable depuis le `SettingsDialog` (« Choisir votre mode »). Fond `#F4F8FA` en clair, neutre du thème en sombre.
 
 ## 4. Commandes
 
